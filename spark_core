@@ -3,3 +3,7 @@ df_emp_csv =df_emp_csv.withColumn("HIREDATE",to_date("HIREDATE",'dd-MM-yyyy')).f
 
 #capture month and year in different column
 df_emp_csv =df_emp_csv.withColumn("YEAR",date_format("HIREDATE",'yyyy')).withColumn("MONTH",date_format("HIREDATE",'MM'))
+
+#Partitioning
+df_emp_csv.write.format("delta").partitionBy("YEAR","MONTH").mode("overwrite").saveAsTable("emp_part")
+df_emp_csv =df_emp_csv.withColumn("YEAR",date_format("HIREDATE",'yyyy')).withColumn("MONTH",date_format("HIREDATE",'MM'))
