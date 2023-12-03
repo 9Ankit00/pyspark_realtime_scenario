@@ -1,1 +1,2 @@
-
+#Change date type dd-MM-yyyy to yyyy-MM-dd
+df_emp_csv =df_emp_csv.withColumn("HIREDATE",to_date("HIREDATE",'dd-MM-yyyy')).fillna({"HIREDATE":'9999-12-31'}).select("HIREDATE").show()
