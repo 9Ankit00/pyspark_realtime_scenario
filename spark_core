@@ -7,3 +7,14 @@ df_emp_csv =df_emp_csv.withColumn("YEAR",date_format("HIREDATE",'yyyy')).withCol
 #Partitioning
 df_emp_csv.write.format("delta").partitionBy("YEAR","MONTH").mode("overwrite").saveAsTable("emp_part")
 df_emp_csv =df_emp_csv.withColumn("YEAR",date_format("HIREDATE",'yyyy')).withColumn("MONTH",date_format("HIREDATE",'MM'))
+
+
+#skip first 2 lines 
+rdd = sc.textFile("/scenario_files/empty_header.csv")
+rdd.collect()
+final_rdd = rdd.zipWithIndex().filter(lambda x: x[1] > 2).map(lambda a :a[0].split(","))
+final_rdd.collect()
+       # skip header/columns from data 
+columns=final_rdd.first() #extract header for filter that row
+data = final_rdd.filter(lambda col: col != columns)   #filter out header
+data.toDF(columns).show()
