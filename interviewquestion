@@ -1,0 +1,48 @@
+employee = [(101,"Ram",10000,105),\
+               (102,"Mohan",75000,104),\
+               (103,"Ramesh",35000,104),\
+               (104,"Manish",50000,106),\
+               (105,"Rohan",85000,106),\
+               (106,"Rakesh",100000,None)]
+
+    
+
+    #defining schema for dataset
+empschema = StructType([ \
+        StructField("empid",IntegerType(),True), \
+        StructField("name",StringType(),True), \
+        StructField("salary",IntegerType(),True), \
+        StructField("managerid", IntegerType(), True), \
+      
+      
+])
+    
+#creating spark dataframe
+empdf = spark.createDataFrame(data=employee,schema=empschema)
+
+department =[(101,3),(102,2),(103,2),(104,2),(105,3),(106,1)]
+
+deptschema=StructType([\
+                    StructField("empid",IntegerType(),True),\
+                    StructField("deptid",IntegerType(),True)\
+                     ])
+
+deptdf = spark.createDataFrame(data=department,schema=deptschema)
+
+empdf.createOrReplaceTempView("employee")
+deptdf.createOrReplaceTempView("department")
+
+#ques1  Find employee who is earning more than his manager
+spark.sql("select * from (select e.empId,e.name,e.Salary as emp_sal,m.salary as man_sal from employee e inner join employee m on e.managerid =m.empId ) as t where t.emp_sal>t.man_sal ").show()
+
+#ques2 Find employee who is earning more than average of of his department
+
+
+query = "WITH my_cte AS (select e.empId,e.name,e.Salary,d.deptid from employee e inner join department d on e.empId=d.empId ) \
+          select * from \
+          (select e.empId,\
+                   e.name,\
+                   avg(e.Salary) over(partition by e.deptid) as avg_sal_each_dept\
+                   ,e.salary from my_cte e)  where salary>avg_sal_each_dept \
+         "
+ spark.sql(query).show()
