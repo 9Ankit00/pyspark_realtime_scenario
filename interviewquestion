@@ -87,3 +87,64 @@ query = "WITH my_cte AS (select e.empId,e.name,e.Salary,d.deptid from employee e
                    ,e.salary from my_cte e)  where salary>avg_sal_each_dept \
          "
  spark.sql(query).show()
+
+
+
+
+employee = [(101,"Ram",10000,"Banglore"),\
+               (102,"Mohan",75000,"Pune"),\
+               (103,"Ramesh",35000,"Banglore"),\
+               (104,"Manish",50000,"Banglore"),\
+               (105,"Rohan",85000,"Pune"),\
+               (106,"Rakesh",100000,"Banglore")]
+
+    
+#defining schema for dataset
+empschema = StructType([ \
+        StructField("empid",IntegerType(),True), \
+        StructField("name",StringType(),True), \
+        StructField("salary",IntegerType(),True), \
+        StructField("EmpCity", StringType(), True), \
+      
+      
+])
+    
+#creating spark dataframe
+empdf = spark.createDataFrame(data=employee,schema=empschema)
+
+Designation = [(101,"Developer"),\
+               (102,"Developer"),\
+               (103,"Consultant"),\
+               (104,"Consultant"),\
+               (105,"Consultant"),\
+               (106,"Developer")]
+
+    
+
+#defining schema for dataset
+DesignationSchema = StructType([ \
+        StructField("empid",IntegerType(),True), \
+        StructField("Designation",StringType(),True), \
+        
+      
+      
+])
+    
+
+
+#creating spark dataframe
+designationdf = spark.createDataFrame(data=Designation,schema=DesignationSchema)
+
+empdf.createOrReplaceTempView("employee")
+designationdf.createOrReplaceTempView("designation")
+
+#ques3 write a query to return the designation with highest salary in each city
+
+spark.sql("select emp.empcity,emp.salary,d.designation from (select * from (select empid,name,salary,empcity\
+       ,max(salary) over(partition by empcity) as maxsal from employee) where salary=maxsal) emp\
+          join designation d on emp.empid=d.empid").show()
+
+
+spark.sql("select * from (select empid,name,salary,empcity\
+       ,max(salary) over(partition by empcity) as maxsal from employee) where salary=maxsal\
+        ").show()
