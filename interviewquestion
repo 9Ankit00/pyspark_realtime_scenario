@@ -144,7 +144,3 @@ spark.sql("select emp.empcity,emp.salary,d.designation from (select * from (sele
        ,max(salary) over(partition by empcity) as maxsal from employee) where salary=maxsal) emp\
           join designation d on emp.empid=d.empid").show()
 
-
-spark.sql("select * from (select empid,name,salary,empcity\
-       ,max(salary) over(partition by empcity) as maxsal from employee) where salary=maxsal\
-        ").show()
